@@ -15,6 +15,12 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#    Note this program is further modified by Manish Boolchandani to meet
+#    preprocessing step of PARFUMS.
+#
+#    Date Modified: 2015-02-09
+#
 
 use strict;
 use warnings;
@@ -30,6 +36,9 @@ use Carp;
 ## run with "--help" for usage information
 ##
 ## Assaf Gordon <assafgordon@gmail.com> , 11sep2008
+##
+## Modified by Manish Boolchandani , 2015-02-09
+##
 
 # Forward declarations
 sub load_barcode_file ($);
@@ -42,7 +51,7 @@ sub read_record;
 sub write_record($);
 sub usage();
 
-# Global flags and arguments, 
+# Global flags and arguments,
 # Set by command line argumens
 my $barcode_file ;
 my $barcodes_at_eol = 0 ;
@@ -56,7 +65,7 @@ my $quiet = 0 ;
 my $debug = 0 ;
 my $fastq_format = 1;
 
-# Global variables 
+# Global variables
 # Populated by 'create_output_files'
 my %filenames;
 my %files;
@@ -109,13 +118,13 @@ sub parse_command_line {
 				  "exact" => \$exact_match,
 				  "prefix=s" => \$newfile_prefix,
 				  "suffix=s" => \$newfile_suffix,
-				  "quiet" => \$quiet, 
+				  "quiet" => \$quiet,
 				  "partial=i" => \$allow_partial_overlap,
 				  "debug" => \$debug,
 				  "mismatches=i" => \$allowed_mismatches,
 				  "help" => \$help
 				  ) ;
-	
+
 	usage() if ($help);
 
 	die "Error: barcode file not specified (use '--bcfile [FILENAME]')\n" unless defined $barcode_file;
@@ -132,7 +141,7 @@ sub parse_command_line {
 
 	die "Error: invalid value for mismatches (valid values are 0 or more)\n" if ($allowed_mismatches<0);
 
-	die "Error: partial overlap value ($allow_partial_overlap) bigger than " . 
+	die "Error: partial overlap value ($allow_partial_overlap) bigger than " .
 		"max. allowed mismatches ($allowed_mismatches)\n" if ($allow_partial_overlap > $allowed_mismatches);
 
 
@@ -160,15 +169,15 @@ sub load_barcode_file ($) {
 		die "Error: bad barcode value ($barcode) at barcode file ($filename) line $.\n"
 			unless $barcode =~ m/^[AGCT]+$/;
 
-		die "Error: bad identifier value ($ident) at barcode file ($filename) line $. (must be alphanumeric)\n" 
+		die "Error: bad identifier value ($ident) at barcode file ($filename) line $. (must be alphanumeric)\n"
 			unless $ident =~ m/^\w+$/;
 
 		die "Error: badcode($ident, $barcode) is shorter or equal to maximum number of " .
-		    "mismatches ($allowed_mismatches). This makes no sense. Specify fewer  mismatches.\n" 
+		    "mismatches ($allowed_mismatches). This makes no sense. Specify fewer  mismatches.\n"
 		    	if length($barcode)<=$allowed_mismatches;
 
 		$barcodes_length = length($barcode) unless defined $barcodes_length;
-		die "Error: found barcodes in different lengths. this feature is not supported yet.\n" 
+		die "Error: found barcodes in different lengths. this feature is not supported yet.\n"
 			unless $barcodes_length == length($barcode);
 
 	 	push @barcodes, [$ident, $barcode];
@@ -198,9 +207,9 @@ sub create_output_files {
 	$barcodes{'unmatched'} = 1 ;
 
 	foreach my $ident (keys %barcodes) {
-		my $new_filename = $newfile_prefix . $ident . $newfile_suffix; 
+		my $new_filename = $newfile_prefix . $ident . $newfile_suffix;
 		$filenames{$ident} = $new_filename;
-		open my $file, ">$new_filename" or die "Error: failed to create output file ($new_filename)\n"; 
+		open my $file, ">$new_filename" or die "Error: failed to create output file ($new_filename)\n";
 		$files{$ident} = $file ;
 	}
 }
@@ -241,11 +250,11 @@ sub match_sequences {
 				$sequence_fragment = substr $seq_bases, - $barcodes_length;
 			}
 
-			my $mm = mismatch_count($sequence_fragment, $barcode) ; 
+			my $mm = mismatch_count($sequence_fragment, $barcode) ;
 
 			# if this is a partial match, add the non-overlap as a mismatch
 			# (partial barcodes are shorter than the length of the original barcodes)
-			$mm += ($barcodes_length - length($barcode)); 
+			$mm += ($barcodes_length - length($barcode));
 
 			if ( $mm < $best_barcode_mismatches_count ) {
 				$best_barcode_mismatches_count = $mm ;
@@ -253,7 +262,7 @@ sub match_sequences {
 			}
 		}
 
-		$best_barcode_ident = 'unmatched' 
+		$best_barcode_ident = 'unmatched'
 			if ( (!defined $best_barcode_ident) || $best_barcode_mismatches_count>$allowed_mismatches) ;
 
 		print STDERR "sequence $seq_bases matched barcode: $best_barcode_ident\n" if $debug;
@@ -358,7 +367,7 @@ FASTA/FASTQ data is read from STDIN (format is auto-detected.)
 Output files will be writen to disk.
 Summary will be printed to STDOUT.
 
-usage: $0 --bcfile FILE --prefix PREFIX [--suffix SUFFIX] [--bol|--eol] 
+usage: $0 --bcfile FILE --prefix PREFIX [--suffix SUFFIX] [--bol|--eol]
          [--mismatches N] [--exact] [--partial N] [--help] [--quiet] [--debug]
 
 Arguments:
@@ -376,7 +385,7 @@ Arguments:
 		  would call the end of the string.)
 		  NOTE: one of --bol, --eol must be specified, but not both.
 --mismatches N	- Max. number of mismatches allowed. default is 1.
---exact		- Same as '--mismatches 0'. If both --exact and --mismatches 
+--exact		- Same as '--mismatches 0'. If both --exact and --mismatches
 		  are specified, '--exact' takes precedence.
 --partial N	- Allow partial overlap of barcodes. (see explanation below.)
 		  (Default is not partial matching)
@@ -385,7 +394,7 @@ Arguments:
 --debug		- Print lots of useless debug information to STDERR.
 --help		- This helpful help screen.
 
-Example (Assuming 's_2_100.txt' is a FASTQ file, 'mybarcodes.txt' is 
+Example (Assuming 's_2_100.txt' is a FASTQ file, 'mybarcodes.txt' is
 the barcodes file):
 
    \$ cat s_2_100.txt | $0 --bcfile mybarcodes.txt --bol --mismatches 2 \\
@@ -393,8 +402,8 @@ the barcodes file):
 
 Barcode file format
 -------------------
-Barcode files are simple text files. Each line should contain an identifier 
-(descriptive name for the barcode), and the barcode itself (A/C/G/T), 
+Barcode files are simple text files. Each line should contain an identifier
+(descriptive name for the barcode), and the barcode itself (A/C/G/T),
 separated by a TAB character. Example:
 
     #This line is a comment (starts with a 'number' sign)
@@ -403,11 +412,11 @@ separated by a TAB character. Example:
     BC3 GTGAT
     BC4 TGTCT
 
-For each barcode, a new FASTQ file will be created (with the barcode's 
-identifier as part of the file name). Sequences matching the barcode 
+For each barcode, a new FASTQ file will be created (with the barcode's
+identifier as part of the file name). Sequences matching the barcode
 will be stored in the appropriate file.
 
-Running the above example (assuming "mybarcodes.txt" contains the above 
+Running the above example (assuming "mybarcodes.txt" contains the above
 barcodes), will create the following files:
 	/tmp/bla_BC1.txt
 	/tmp/bla_BC2.txt
@@ -437,7 +446,7 @@ Matching with '--bol --mismatches 1':
    TGTCT (3 mismatches, BC4)
 
 This sequence will be classified as 'BC1' (it has the lowest mismatch count).
-If '--exact' or '--mismatches 0' were specified, this sequence would be 
+If '--exact' or '--mismatches 0' were specified, this sequence would be
 classified as 'unmatched' (because, although BC1 had the lowest mismatch count,
 it is above the maximum allowed mismatches).
 
@@ -463,7 +472,7 @@ Partial overlapping would also try the following match:
 
 Note: scoring counts a missing base as a mismatch, so the final
 mismatch count is 2 (1 'real' mismatch, 1 'missing base' mismatch).
-If running with '--mismatches 2' (meaning allowing upto 2 mismatches) - this 
+If running with '--mismatches 2' (meaning allowing upto 2 mismatches) - this
 seqeunce will be classified as BC1.
 
 EOF

@@ -1,0 +1,5 @@
+Parfums preprocessing step. In this directory, I will write code to preprocess raw illumina sequence files.
+
+Command: time cat lane1_NoIndex_L001_R1_001.fastq | perl ./fastx_barcode_splitter.pl --bcfile barcode_file.txt --prefix FW_ --suffix .txt --bol --exact
+
+The above command splits the read file into multiple files based on the barcodes present in the barcode_file
