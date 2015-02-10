@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-#    Note this program is further modified by Manish Boolchandani to meet
+#    Note this program is further modified by Manishi Boolchandani to meet
 #    preprocessing step of PARFUMS.
 #
 #    Date Modified: 2015-02-09
