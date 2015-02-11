@@ -74,7 +74,6 @@ my $barcodes_length;
 my @barcodes;
 my $input_file_io;
 
-
 # The Four lines per record in FASTQ format.
 # (when using FASTA format, only the first two are used)
 my $seq_name;
@@ -160,7 +159,7 @@ sub load_barcode_file ($) {
 	while (<BCFILE>) {
 		next if m/^#/;
 		chomp;
-		my ($ident, $barcode) = split ;
+		my ($barcode, $ident) = split ;
 
 		$barcode = uc($barcode);
 
@@ -336,6 +335,7 @@ sub write_record($)
 
 sub open_and_detect_input_format
 {
+	print "Detecting Output Type\n";
 	$input_file_io  = new IO::Handle;
 	die "Failed to open STDIN " unless $input_file_io->fdopen(fileno(STDIN),"r");
 
